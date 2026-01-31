@@ -1,4 +1,7 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Depends
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from car_api.core.database import get_session
 
 from car_api.db import USERS
 from car_api.schemas.users import (
@@ -15,7 +18,10 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=UserPublicSchema,
 )
-async def create_user(user: UserSchema):
+async def create_user(
+    user: UserSchema,
+    db: AsyncSession = Depends(get_session),
+):
     user_with_id = UserPublicSchema(**user.model_dump(), id=len(USERS) + 1)
     USERS.append(user_with_id)
     return user_with_id
